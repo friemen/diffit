@@ -4,11 +4,12 @@
 
 ;; Concepts
 ;;
-;; fp is map from diagonal k to a pair [d edits],
-;;   where d is the furthest distance and
+;; fp is a map {k -> [d edits]} from diagonal k to a pair where
+;;   d is the furthest distance and
 ;;   edits is a vector of edit operations.
 ;; 
 ;; as, bs are sequences of arbitrary items that support =
+;; av, bv are vector versions that have better count and nth performance
 ;; 
 ;; 
 
@@ -19,41 +20,50 @@
     (println (format "%4d" k) (format "%4d" d) " -> " edits))
   (println (apply str (repeat 40 "-"))))
 
+(defmacro with-time
+  [time-atom & exprs]
+  `(let [start# (System/nanoTime)
+         result# ~@exprs
+         stop# (System/nanoTime)]
+     (swap! ~time-atom + (- stop# start#))
+     result#))
 
 
-(defn- equals   [[a b]] (= a b))
 (defn- distance [fp k]  (first (get fp k [-1])))
 (defn- edits    [fp k]  (second (get fp k [nil []])))
-
 
 (defn- snake
   "Advances x on the diagonal k as long as corresponding items in as
   and bs match."
-  [as bs fp k]
-  (let [k+1   (inc k)
+  [av bv fp k]
+  (let [n     (count av)
+        m     (count bv)
+        k+1   (inc k)
         k-1   (dec k)
         i     (inc (distance fp k-1))
         j     (distance fp k+1)
         x     (max i j)
-        d     (->> (map vector (drop x as) (drop (- x k) bs))
-                   (take-while equals)
-                   (count))]
-    [(+ x d)
+        y     (- x k)
+        fx    (loop [^long x x ^long y y]
+                (if (and (< x n) (< y m) (= (nth av x) (nth bv y)) )
+                  (recur (inc x) (inc y))
+                  x))]
+    [fx
      (into (if (> i j)
              (conj (edits fp k-1) :-)
              (conj (edits fp k+1) :+))
-           (repeat d :=))]))
+           (repeat (- fx x) :=))]))
 
 
 (defn- step
   "Returns the next pair of [fp p] of furthest distances."
-  [as bs delta [fp p]]
+  [av bv delta [fp p]]
   (let [p         (inc p)
         diagonals (concat (range (* -1 p) delta)
                           (range (+ delta p) delta -1)
                           [delta])
         fp        (reduce (fn [fp k]
-                            (assoc fp k (snake as bs fp k)))
+                            (assoc fp k (snake av bv fp k)))
                           fp
                           diagonals)]
     #_(dump fp)
@@ -62,12 +72,12 @@
 
 (defn diff*
   "Assumes that (count as) >= (count bs)."
-  [as n bs m]
-  (let [delta (- n m)
+  [av bv]
+  (let [delta (- (count av) (count bv))
         [fp p] (->> [{} -1]
-                    (iterate (partial step as bs delta))
+                    (iterate (partial step av bv delta))
                     (drop-while (fn [[fp _]]
-                                  (not= (distance fp delta) n)))
+                                  (not= (distance fp delta) (count av))))
                     (first))]
     [(+ delta (* 2 p)) (->> (get fp delta) second (drop 1))]))
 
@@ -80,7 +90,7 @@
 
 (defn editscript
   "Produces an edit script from the edits issued by diff*."
-  [as bs edits]
+  [av bv edits]
   (loop [groups (partition-by identity edits)
          x 0
          y 0
@@ -93,7 +103,7 @@
                     (conj script [:- x n]))
           :+ (recur (rest groups)
                     (+ x n) (+ y n)
-                    (conj script [:+ y (subvec (vec bs) y (+ y n))]))
+                    (conj script [:+ y (subvec bv y (+ y n))]))
           (recur (rest groups)
                  (+ x n) (+ y n)
                  script)))
@@ -115,12 +125,12 @@
   The edit-script is made for sequential processing with operations
   like insert-at: [xs pos items -> xs'] and  remove-at: [xs pos n -> xs']."
   [as bs]
-  (let [n (count as)
-        m (count bs)
-        [d edits] (if (< n m)
-                    (swap-insdels (diff* bs m as n))
-                    (diff* as n bs m))]
-    [d (editscript as bs edits)]))
+  (let [av (vec as)
+        bv (vec bs)
+        [d edits] (if (< (count av) (count bv))
+                    (swap-insdels (diff* bv av))
+                    (diff* av bv))]
+    [d (editscript av bv edits)]))
 
 
 ;; inefficient insert and remove implementation
