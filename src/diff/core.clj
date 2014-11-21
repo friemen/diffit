@@ -20,7 +20,7 @@
     (println (format "%4d" k) (format "%4d" d) " -> " edits))
   (println (apply str (repeat 40 "-"))))
 
-(defmacro with-time
+(defmacro ^:private with-time
   [time-atom & exprs]
   `(let [start# (System/nanoTime)
          result# ~@exprs
@@ -32,9 +32,10 @@
 (defn- distance [fp k]  (first (get fp k [-1])))
 (defn- edits    [fp k]  (second (get fp k [nil []])))
 
+
 (defn- snake
-  "Advances x on the diagonal k as long as corresponding items in as
-  and bs match."
+  "Advances x on the diagonal k as long as corresponding items in av
+  and bv match."
   [av bv fp k]
   (let [n     (count av)
         m     (count bv)
@@ -44,15 +45,20 @@
         j     (distance fp k+1)
         x     (max i j)
         y     (- x k)
+        ;; search for the maximum x on diagonal
         fx    (loop [^long x x ^long y y]
                 (if (and (< x n) (< y m) (= (nth av x) (nth bv y)) )
                   (recur (inc x) (inc y))
                   x))]
     [fx
-     (into (if (> i j)
-             (conj (edits fp k-1) :-)
-             (conj (edits fp k+1) :+))
-           (repeat (- fx x) :=))]))
+     ;; add edit operation symbols
+     (loop [n  (- fx x)
+            es (if (> i j)
+                 (conj! (transient (edits fp k-1)) :-)
+                 (conj! (transient (edits fp k+1)) :+))]
+       (if (pos? n)
+         (recur (dec n) (conj! es :=))
+         (persistent! es)))]))
 
 
 (defn- step
@@ -66,7 +72,6 @@
                             (assoc fp k (snake av bv fp k)))
                           fp
                           diagonals)]
-    #_(dump fp)
     [fp p]))
 
 
@@ -79,7 +84,9 @@
                     (drop-while (fn [[fp _]]
                                   (not= (distance fp delta) (count av))))
                     (first))]
-    [(+ delta (* 2 p)) (->> (get fp delta) second (drop 1))]))
+    [(+ delta (* 2 p)) (->> (get fp delta)
+                            (second)
+                            (drop 1))]))
 
 
 (defn swap-insdels
