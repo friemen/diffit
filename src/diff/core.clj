@@ -8,7 +8,7 @@
 ;;   d is the furthest distance and
 ;;   edits is a vector of edit operations.
 ;; 
-;; as, bs are sequences of arbitrary items that support =
+;; as, bs are sequences of arbitrary items that support equals (=)
 ;; av, bv are vector versions that have better count and nth performance
 ;; 
 ;; 
@@ -19,6 +19,7 @@
   (doseq [[k [d edits]] (sort-by first fp)]
     (println (format "%4d" k) (format "%4d" d) " -> " edits))
   (println (apply str (repeat 40 "-"))))
+
 
 (defmacro ^:private with-time
   [time-atom & exprs]
@@ -75,7 +76,7 @@
     [fp p]))
 
 
-(defn diff*
+(defn- diff*
   "Assumes that (count as) >= (count bs)."
   [av bv]
   (let [delta (- (count av) (count bv))
@@ -89,13 +90,13 @@
                             (drop 1))]))
 
 
-(defn swap-insdels
+(defn- swap-insdels
   "Swaps edit operation symbols :+ <-> :-"
   [[d edits]]
   [d (map {:+ :- :- :+ := :=} edits)])
 
 
-(defn editscript
+(defn- editscript
   "Produces an edit script from the edits issued by diff*."
   [av bv edits]
   (loop [groups (partition-by identity edits)
@@ -118,8 +119,8 @@
 
 
 (defn diff
-  "Returns a pair [edit-distance edit-script] as result comparision of
-  sequences as and bs.
+  "Returns a pair [edit-distance edit-script] as result of comparision
+  of sequences as and bs.
 
   Edit-distance is an integer. 
 
@@ -140,7 +141,7 @@
     [d (editscript av bv edits)]))
 
 
-;; inefficient insert and remove implementation
+;; naive insert and remove implementation
 
 (defn- insert-at
   [xs i ys]

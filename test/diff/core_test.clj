@@ -32,10 +32,11 @@
 
 
 (deftest random-tests
-  (are [n] (let [as (range n)
-                 bs (rand-alter 50 25 25 as)
+  (are [n] (let [as      (range n)
+                 bs      (rand-alter 90 5 5 as)
+                 _       (println n "items")
                  diffres (time (diff as bs))
-                 patched (time (patch as diffres))]
+                 patched (patch as diffres)]
              (= bs patched))
        10 100 1000 2000))
 
@@ -54,9 +55,9 @@
     (println "actual  " patched)
     (assert (= (vec bs) patched))))
 
-#_(do (def n 20)
-      (def as (rand-alter 50 25 25 (range n)))
+#_(do (def n 2000)
+      (def as (rand-alter 90 5 5 (range n)))
       (def bs (range n)))
 #_(do (reset! diff.core/t-snake 0)
-		    (diff as bs)
-		    (println (float (/ @diff.core/t-snake 1e6))))
+      (diff as bs)
+      (println (float (/ @diff.core/t-snake 1e6))))
