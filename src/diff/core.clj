@@ -118,13 +118,13 @@
 
 
 (defn diff
-  "Returns a pair [edit-distance edit-script] after comparision of
-  sequences as and bs. 
+  "Returns a pair [edit-distance edit-script] as result comparision of
+  sequences as and bs.
 
   Edit-distance is an integer. 
 
   The edit-script is a sequence of vectors starting with an insert or
-  delete operation.
+  delete operation symbol :+ or :-.
 
   An insert is [:+ position items].
   A delete is  [:- position number-of-items].
@@ -157,11 +157,16 @@
 
 
 (defn patch
-  [as [d es]]
-  (vec (reduce (fn [bs [op & params]]
-                 (case op
-                   :+ (insert-at bs (first params) (second params))
-                   :- (remove-at bs (first params) (second params))))
-               (vec as)
-               es)))
+  "Applies the edit-script (as contained in the result of diff) to
+  sequence as, using by default insert-at and remove-at as implemented
+  in this namespace. Returns a vector."
+  ([as diff-result]
+     (patch insert-at remove-at as diff-result))
+  ([insert-f remove-f as [d es]]
+     (vec (reduce (fn [bs [op & params]]
+                    (case op
+                      :+ (insert-f bs (first params) (second params))
+                      :- (remove-f bs (first params) (second params))))
+                  (vec as)
+                  es))))
 
