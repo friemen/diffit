@@ -1,6 +1,6 @@
-(ns diff.core-test
+(ns seqdiff.core-test
   (:require [clojure.test :refer :all]
-            [diff.core :refer :all]))
+            [seqdiff.core :refer :all]))
 
 
 

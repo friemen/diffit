@@ -1,4 +1,4 @@
-(ns diff.core
+(ns seqdiff.core
   "Implementation of O(NP) sequence comparison algorithm.")
 
 
@@ -53,13 +53,12 @@
                   x))]
     [fx
      ;; add edit operation symbols
-     (loop [n  (- fx x)
-            es (if (> i j)
-                 (conj! (transient (edits fp k-1)) :-)
-                 (conj! (transient (edits fp k+1)) :+))]
-       (if (pos? n)
-         (recur (dec n) (conj! es :=))
-         (persistent! es)))]))
+     (let [es (if (> i j)
+                (conj (edits fp k-1) :-)
+                (conj (edits fp k+1) :+))]
+       (if (> fx x)
+         (conj es (- fx x))
+         es))]))
 
 
 (defn- step
@@ -93,12 +92,13 @@
 (defn- swap-insdels
   "Swaps edit operation symbols :+ <-> :-"
   [[d edits]]
-  [d (map {:+ :- :- :+ := :=} edits)])
+  [d (map (fn [op] (case op :+ :- :- :+ op)) edits)])
 
 
 (defn- editscript
   "Produces an edit script from the edits issued by diff*."
   [av bv edits]
+  ;; the groups are seqs of :+'s or :-'s or one number
   (loop [groups (partition-by identity edits)
          x 0
          y 0
@@ -113,7 +113,7 @@
                     (+ x n) (+ y n)
                     (conj script [:+ y (subvec bv y (+ y n))]))
           (recur (rest groups)
-                 (+ x n) (+ y n)
+                 (+ x op) (+ y op) ; op is the number of items to skip
                  script)))
       script)))
 

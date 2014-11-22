@@ -1,28 +1,33 @@
-# onpdiff
+# seqdiff
 
-A diff implementation that produces an edit-script.
-It follows
+A diff on two sequences that produces a minimal edit-script to
+transform the first into the second by applying insertions and
+deletions.  It follows
 [An O(NP) Sequence Comparison Algorithm](http://www.itu.dk/stud/speciale/bepjea/xwebtex/litt/an-onp-sequence-comparison-algorithm.pdf)
 by Wu, Manber, Myers and Miller.
 
-The API consists of a `diff` and a `patch` function.
+The API consists of a `(diff xs ys)` and a `(patch diff-result xs)` function, where
+`(= ys (patch xs (diff xs ys))`.
 
 ## Usage
 
 Include a dependency in your project.clj.
 
+TODO
+
 In the REPL
 
 ```clojure
-(require '[diff.core :as d])
+(require '[seqdiff.core :as d])
 ;= nil
-(diff [1 2 3 4] [1 2 7 8 4])
+(d/diff [1 2 3 4] [1 2 7 8 4])
 ;= [3 [[:+ 2 [7 8]] [:- 4 1]]]
 ```
 
-The result is a pair: the first part is the edit distance, the second
-part is a sequence of edits (called an *edit-script*) that is needed
-to create the second input sequence from the first.
+The result is a pair: the first part is the
+[edit distance](http://en.wikipedia.org/wiki/Edit_distance), the
+second part is a sequence of edits (called an *edit-script*) that is
+needed to create the second input sequence from the first.
 
 It's produced in a form that allows sequential processing in a `patch`
 function with insert and remove operations, where insert takes a
@@ -35,9 +40,7 @@ The edit-script in the output above can be read like this:
 * First, add the sequence [7 8] at position 2 (this will shift the items 3 4 to the right).
 * Then, remove 1 item at position 4.
 
-There's also a `patch` operation included, but its current
-implementation is a bit slow.
-
+TODO describe patch
 
 ## License
 
