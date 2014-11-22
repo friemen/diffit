@@ -55,9 +55,14 @@
     (println "actual  " patched)
     (assert (= (vec bs) patched))))
 
-#_(do (def n 2000)
-      (def as (rand-alter 90 5 5 (range n)))
+#_ (do (def n 2000)
+      (def as (rand-alter 80 10 10 (range n)))
       (def bs (range n)))
-#_(do (reset! diff.core/t-snake 0)
+
+#_ (do (reset! seqdiff.core/t 0)
       (diff as bs)
-      (println (float (/ @diff.core/t-snake 1e6))))
+      (println (float (/ @seqdiff.core/t 1e6))))
+
+#_( require '[clj-diff.core :as d])
+#_ (>bench (d/diff as bs))
+#_ (>bench (diff as bs))

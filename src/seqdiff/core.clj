@@ -29,9 +29,10 @@
      (swap! ~time-atom + (- stop# start#))
      result#))
 
+(def t (atom 0))
 
-(defn- distance [fp k]  (first (get fp k [-1])))
-(defn- edits    [fp k]  (second (get fp k [nil []])))
+(defn- distance [fp k]  (nth (get fp k [-1]) 0))
+(defn- edits    [fp k]  (nth (get fp k [nil []]) 1))
 
 
 (defn- snake
