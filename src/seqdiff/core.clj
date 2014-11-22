@@ -69,10 +69,10 @@
         diagonals (concat (range (* -1 p) delta)
                           (range (+ delta p) delta -1)
                           [delta])
-        fp        (reduce (fn [fp k]
-                            (assoc fp k (snake av bv fp k)))
-                          fp
-                          diagonals)]
+        fp        (loop [ds diagonals fpt (transient fp)]
+                    (if-let [k (first ds)]
+                      (recur (rest ds) (assoc! fpt k (snake av bv fpt k)))
+                      (persistent! fpt)))]
     [fp p]))
 
 
