@@ -39,14 +39,14 @@
   "Advances x on the diagonal k as long as corresponding items in av
   and bv match."
   [av bv fp k]
-  (let [n     (count av)
-        m     (count bv)
-        k+1   (inc k)
-        k-1   (dec k)
-        i     (inc (distance fp k-1))
-        j     (distance fp k+1)
-        x     (max i j)
-        y     (- x k)
+  (let [      n     (count av)
+              m     (count bv)
+        ^long k+1   (inc k)
+        ^long k-1   (dec k)
+              i     (inc (distance fp k-1))
+        ^long j     (distance fp k+1)
+        ^long x     (max i j)
+        ^long y     (- x k)
         ;; search for the maximum x on diagonal
         fx    (loop [^long x x ^long y y]
                 (if (and (< x n) (< y m) (= (nth av x) (nth bv y)) )
@@ -65,14 +65,17 @@
 (defn- step
   "Returns the next pair of [fp p] of furthest distances."
   [av bv delta [fp p]]
-  (let [p         (inc p)
-        diagonals (concat (range (* -1 p) delta)
-                          (range (+ delta p) delta -1)
-                          [delta])
-        fp        (loop [ds diagonals fpt (transient fp)]
-                    (if-let [k (first ds)]
-                      (recur (rest ds) (assoc! fpt k (snake av bv fpt k)))
-                      (persistent! fpt)))]
+  (let [p   (inc p)
+        fpt (transient fp)
+        fpt (loop [k (* -1 p) fpt fpt]
+              (if (< k delta)
+                (recur (inc k) (assoc! fpt k (snake av bv fpt k)))
+                fpt))
+        fpt (loop [k (+ delta p) fpt fpt]
+              (if (< delta k)
+                (recur (dec k) (assoc! fpt k (snake av bv fpt k)))
+                fpt))
+        fp  (persistent! (assoc! fpt delta (snake av bv fpt delta)))]
     [fp p]))
 
 
