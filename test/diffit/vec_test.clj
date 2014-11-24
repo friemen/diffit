@@ -1,11 +1,12 @@
-(ns seqdiff.core-test
+(ns diffit.vec-test
   (:require [clojure.test :refer :all]
-            [seqdiff.core :refer :all]))
+            [diffit.vec :refer [diff patch]])
+  (:import [java.util ArrayList]))
 
 
 
-(deftest diff-tests
-  (are [as bs] (= bs (apply str (patch as (diff as bs))))
+(deftest diffpatch-tests
+  (are [as         bs] (= bs (apply str (patch as (diff as bs))))
        ""          ""
        ""          "abc"
        "ab"        ""
@@ -14,7 +15,26 @@
        "ab"        "ABCabXYZ"
        "ABC"       "abc"
        "ABCDEF"    "ADEF"
-       "ABCDEF"    "ABCdefXYZEF"))
+       "ABCDEF"    "ABCdefXYZEFABCDEF"))
+
+
+(deftest patch-javalist-test
+  (let [as [:a :b :c :d :e :a :b :d]
+        bs [:a :c :d :a :b :d]
+        dr (diff as bs)
+        ml (let [ml (ArrayList.)]
+             (doseq [a as]
+               (.add ml a))
+             ml)]
+    (patch (fn [l index item]
+             (.addAll l index item)
+             l)
+           (fn [l index n]
+             (dotimes [_ n] (.remove l index))
+             l)
+           ml
+           dr)
+    (= ml bs)))
 
 
 (defn rand-alter
@@ -41,10 +61,9 @@
        10 100 1000 2000))
 
 
-
 ;; debugging tool
 
-(defn test-diffpatch
+(defn diffpatch
   [as bs]
   (println as)
   (println bs)
@@ -55,14 +74,17 @@
     (println "actual  " patched)
     (assert (= (vec bs) patched))))
 
-#_ (do (def n 2000)
-      (def as (rand-alter 80 10 10 (range n)))
-      (def bs (range n)))
-
-#_ (do (reset! seqdiff.core/t 0)
+#_ (do (reset! diffit.vec/t 0)
       (diff as bs)
-      (println (float (/ @seqdiff.core/t 1e6))))
+      (println (float (/ @diffit.vec/t 1e6))))
 
-#_( require '[clj-diff.core :as d])
-#_ (>bench (d/diff as bs))
+#_ (do (def as (range 2000))
+    (def bs (rand-alter 80 10 10 (range n))))
+
 #_ (>bench (diff as bs))
+
+#_ ( require '[clj-diff.core :as d])
+#_ (>bench (d/diff as bs))
+
+#_ (import '[difflib DiffUtils])
+#_ (>bench (DiffUtils/diff as bs))

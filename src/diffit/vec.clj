@@ -1,5 +1,5 @@
-(ns seqdiff.core
-  "Implementation of O(NP) sequence comparison algorithm.")
+(ns diffit.vec
+  "O(NP) sequence diff and corresponding patch on vectors.")
 
 
 ;; Concepts
@@ -11,17 +11,18 @@
 ;; as, bs are sequences of arbitrary items that support equals (=)
 ;; av, bv are vector versions that have better count and nth performance
 ;; 
-;; 
 
+;; ---------------------------------------------------------------------------
+;; stuff to debug and tune performance
 
-(defn- dump
+#_ (defn- dump
   [fp]
   (doseq [[k [d edits]] (sort-by first fp)]
     (println (format "%4d" k) (format "%4d" d) " -> " edits))
   (println (apply str (repeat 40 "-"))))
 
 
-(defmacro ^:private with-time
+#_ (defmacro ^:private with-time
   [time-atom & exprs]
   `(let [start# (System/nanoTime)
          result# ~@exprs
@@ -29,7 +30,11 @@
      (swap! ~time-atom + (- stop# start#))
      result#))
 
-(def t (atom 0))
+#_ (def t (atom 0))
+
+
+;; ---------------------------------------------------------------------------
+;; diff
 
 (defn- distance [fp k]  (nth (get fp k [-1]) 0))
 (defn- edits    [fp k]  (nth (get fp k [nil []]) 1))
@@ -137,15 +142,24 @@
   The edit-script is made for sequential processing with operations
   like insert-at: [xs pos items -> xs'] and  remove-at: [xs pos n -> xs']."
   [as bs]
-  (let [av (vec as)
-        bv (vec bs)
-        [d edits] (if (< (count av) (count bv))
-                    (swap-insdels (diff* bv av))
-                    (diff* av bv))]
-    [d (editscript av bv edits)]))
+  (cond
+   (and (empty? as) (empty? bs))
+   [0 []]
+   (empty? as)
+   [(count bs) [[:+ 0 bs]]]
+   (empty? bs)
+   [(count as) [[:- 0 (count as)]]]
+   :else
+   (let [av (vec as)
+         bv (vec bs)
+         [d edits] (if (< (count av) (count bv))
+                     (swap-insdels (diff* bv av))
+                     (diff* av bv))]
+     [d (editscript av bv edits)])))
 
 
-;; naive insert and remove implementation
+;; ---------------------------------------------------------------------------
+;; patch
 
 (defn- insert-at
   [xs i ys]
@@ -166,12 +180,13 @@
   sequence as, using by default insert-at and remove-at as implemented
   in this namespace. Returns a vector."
   ([as diff-result]
-     (patch insert-at remove-at as diff-result))
+     (patch insert-at remove-at (vec as) diff-result))
   ([insert-f remove-f as [d es]]
      (vec (reduce (fn [bs [op & params]]
                     (case op
                       :+ (insert-f bs (first params) (second params))
                       :- (remove-f bs (first params) (second params))))
-                  (vec as)
+                  as
                   es))))
+
 
