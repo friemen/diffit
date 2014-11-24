@@ -1,12 +1,11 @@
 # diffit
 
-A diff on two vectors / maps that produces the edit distance and a
-minimal edit-script to transform the first into the second collection
-by applying insertions and deletions.
+A Clojure(Script) diff and patch implementation for vectors and
+maps. It calculates the *edit-distance* and a minimal *edit-script* to
+transform the first into the second collection by applying insertions
+and deletions.
 
 [![Build Status](https://travis-ci.org/friemen/diffit.png?branch=master)](https://travis-ci.org/friemen/diffit)
-
-[API docs](https://friemen.github.com/diffit)
 
 [![Clojars Project](http://clojars.org/diffit/latest-version.svg)](http://clojars.org/diffit)
 
@@ -14,17 +13,23 @@ The vector based implementation follows
 [An O(NP) Sequence Comparison Algorithm](http://www.itu.dk/stud/speciale/bepjea/xwebtex/litt/an-onp-sequence-comparison-algorithm.pdf)
 by Wu, Manber, Myers and Miller.
 
-Supports Clojure and ClojureScript.
+[API docs](https://friemen.github.com/diffit)
 
 
 ## Why
 
-Building data transformations with side-effect free functions is sane,
-but can sometimes require to synchronize the final result of a
-transformation with state that has an expensive mutation-based API
-around it, for example a bound JavaFX ObservableList, or to transmit the
-changes to a remote process for further processing. A fast diff is one
-way to tackle this.
+The obvious application of the vector based implementation is diff and
+patch of text files represented by seqs of strings.
+
+Another could be this: building data transformations with side-effect
+free functions is sane, but might require synchronization of
+the final result with state wrapped by an expensive mutation-based
+API, for example a bound JavaFX ObservableList.
+
+A 3rd scenario could be the requirement to transmit a minimal amount
+of data changes to a remote process for further processing. A fast
+diff is one way to tackle this.
+
 
 There is `clojure.data/diff` but it does not exactly what I had
 in mind, as the following REPL output shows:
@@ -34,10 +39,10 @@ in mind, as the following REPL output shows:
 ;= [[nil 2 3 4 5 6 7 8] [nil 3 4 5 6 9] [1]]
 ```
 
-The result must be interpreted according to its docstring as
-`[things-only-in-a things-only-in-b things-in-both]`. However,
-the sequence `[3 4 5 6]` is part of , so the result is far from
-something like a minimal edit-script.
+The docstring says that the resulting triplet contains
+`[things-only-in-a things-only-in-b things-in-both]`. However, the
+common sequence `[3 4 5 6]` is part of the first two, so the result is
+not a minimal edit-script.
 
 
 Next stop was [clj-diff](https://github.com/brentonashworth/clj-diff),
