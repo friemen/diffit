@@ -4,9 +4,18 @@ A diff on two vectors / maps that produces the edit distance and a
 minimal edit-script to transform the first into the second collection
 by applying insertions and deletions.
 
+[![Build Status](https://travis-ci.org/friemen/diffit.png?branch=master)](https://travis-ci.org/friemen/diffit)
+
+[API docs](https://friemen.github.com/diffit)
+
+[![Clojars Project](http://clojars.org/diffit/latest-version.svg)](http://clojars.org/diffit)
+
 The vector based implementation follows
 [An O(NP) Sequence Comparison Algorithm](http://www.itu.dk/stud/speciale/bepjea/xwebtex/litt/an-onp-sequence-comparison-algorithm.pdf)
 by Wu, Manber, Myers and Miller.
+
+Supports Clojure and ClojureScript.
+
 
 ## Why
 
@@ -23,18 +32,8 @@ into a non-snapshot release. My implementation is from scratch, but - of
 course - contains insights from existing open source work such as `clj-diff`
 and others.
 
-## TODO
-
-* ClojureScript version
-* Do a more extensive test on text files
-* Replace naive vector insert and remove implementation with more sophisticated one
 
 ## Usage
-
-Include a dependency in your project.clj.
-
-TODO: release
-
 
 There are two namespaces: `diffit.vec` and `diffit.map`. Each contains
 a `diff` and a `patch` function.
@@ -144,7 +143,7 @@ This snippet defines source and sink sequences:
 
 ```clojure
 (do (def as (range 2000))
-    (def bs (rand-alter 80 10 10 (range n))))
+    (def bs (rand-alter 80 10 10 as))))
 ```
 
 Here's the piece of code that creates the sink from the source vector:
@@ -163,7 +162,6 @@ Here's the piece of code that creates the sink from the source vector:
             []
             xs)))
 ```
-
 
 I used [criterium](https://github.com/hugoduncan/criterium) `bench` to
 gather times on a JDK 1.8.0_5 with Clojure 1.6.0 and 4 cores of
@@ -220,8 +218,8 @@ Found 4 outliers in 60 samples (6.6667 %)
 ```
 
 
-The `diff` for maps is an order of magnitude faster due to the
-performance characteristics of the underlying datastructures.
+Unsurprisingly, the `diff` for maps is an order of magnitude faster due
+to the performance characteristics of the underlying datastructures.
 
 
 ## License

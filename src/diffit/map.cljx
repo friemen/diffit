@@ -3,7 +3,7 @@
 
 
 ;; ---------------------------------------------------------------------------
-;; patch
+;; diff
 
 (defn diff
   "Returns a pair [edit-distance edit-script] as result of comparision

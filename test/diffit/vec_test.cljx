@@ -1,7 +1,9 @@
 (ns diffit.vec-test
-  (:require [clojure.test :refer :all]
+  (:require #+clj [clojure.test :refer :all]
+            #+cljs [cemerick.cljs.test :as t]
             [diffit.vec :refer [diff patch]])
-  (:import [java.util ArrayList]))
+  #+cljs (:require-macros [cemerick.cljs.test :refer [is are deftest testing]])
+  #+clj (:import [java.util ArrayList]))
 
 
 
@@ -17,7 +19,7 @@
        "ABCDEF"    "ADEF"
        "ABCDEF"    "ABCdefXYZEFABCDEF"))
 
-
+#+clj
 (deftest patch-javalist-test
   (let [as [:a :b :c :d :e :a :b :d]
         bs [:a :c :d :a :b :d]
@@ -60,31 +62,3 @@
              (= bs patched))
        10 100 1000 2000))
 
-
-;; debugging tool
-
-(defn diffpatch
-  [as bs]
-  (println as)
-  (println bs)
-  (let [diffres (diff as bs)
-        patched (patch as diffres)]
-    (println (second diffres))
-    (println "expected" (vec bs))
-    (println "actual  " patched)
-    (assert (= (vec bs) patched))))
-
-#_ (do (reset! diffit.vec/t 0)
-      (diff as bs)
-      (println (float (/ @diffit.vec/t 1e6))))
-
-#_ (do (def as (range 2000))
-    (def bs (rand-alter 80 10 10 (range n))))
-
-#_ (>bench (diff as bs))
-
-#_ ( require '[clj-diff.core :as d])
-#_ (>bench (d/diff as bs))
-
-#_ (import '[difflib DiffUtils])
-#_ (>bench (DiffUtils/diff as bs))

@@ -12,48 +12,35 @@
 ;; av, bv are vector versions that have better count and nth performance
 ;; 
 
-;; ---------------------------------------------------------------------------
-;; stuff to debug and tune performance
-
-#_ (defn- dump
-  [fp]
-  (doseq [[k [d edits]] (sort-by first fp)]
-    (println (format "%4d" k) (format "%4d" d) " -> " edits))
-  (println (apply str (repeat 40 "-"))))
-
-
-#_ (defmacro ^:private with-time
-  [time-atom & exprs]
-  `(let [start# (System/nanoTime)
-         result# ~@exprs
-         stop# (System/nanoTime)]
-     (swap! ~time-atom + (- stop# start#))
-     result#))
-
-#_ (def t (atom 0))
-
 
 ;; ---------------------------------------------------------------------------
 ;; diff
 
-(defn- distance [fp k]  (nth (get fp k [-1]) 0))
-(defn- edits    [fp k]  (nth (get fp k [nil []]) 1))
+(defn- edits
+  [fp k]
+  (nth (get fp k [nil []]) 1))
+
+
+(defn- distance
+  [fp k]
+  (nth (get fp k [-1]) 0))
 
 
 (defn- snake
   "Advances x on the diagonal k as long as corresponding items in av
   and bv match."
   [av bv fp k]
-  (let [      n     (count av)
-              m     (count bv)
-        ^long k+1   (inc k)
-        ^long k-1   (dec k)
-              i     (inc (distance fp k-1))
-        ^long j     (distance fp k+1)
-        ^long x     (max i j)
-        ^long y     (- x k)
+  (let [n     (count av)
+        m     (count bv)
+        #+clj ^long k+1 #+cljs k+1 (inc k)
+        #+clj ^long k-1 #+cljs k-1 (dec k)
+        i   (inc (distance fp k-1))
+        #+clj ^long j   #+cljs j   (distance fp k+1)
+        #+clj ^long x   #+cljs x   (max i j)
+        #+clj ^long y   #+cljs y   (- x k)
         ;; search for the maximum x on diagonal
-        fx    (loop [^long x x ^long y y]
+        fx    (loop [#+clj ^long x #+cljs x x
+                     #+clj ^long y #+cljs y y]
                 (if (and (< x n) (< y m) (= (nth av x) (nth bv y)) )
                   (recur (inc x) (inc y))
                   x))]
@@ -161,18 +148,21 @@
 ;; ---------------------------------------------------------------------------
 ;; patch
 
-(defn- insert-at
+
+(defn insert-at
+  "Insert sequence ys at position i into xs."
   [xs i ys]
-  (concat (take i xs)
-          (if (coll? ys) ys (list ys))
-          (drop i xs)))
+  (let [xv (vec xs)]
+    (concat (subvec xv 0 i) ys (subvec xv i))))
 
 
-(defn- remove-at
+(defn remove-at
+  "Remove n items at position i from xs."
   ([xs i]
      (remove-at xs i 1))
   ([xs i n]
-     (concat (take i xs) (drop (+ i n) xs))))
+     (let [xv (vec xs)]
+       (concat (subvec xv 0 i) (subvec xv (+ i n))))))
 
 
 (defn patch
