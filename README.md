@@ -26,11 +26,24 @@ around it, for example a bound JavaFX ObservableList, or to transmit the
 changes to a remote process for further processing. A fast diff is one
 way to tackle this.
 
-Unfortunately, the good work in
-[clj-diff](https://github.com/brentonashworth/clj-diff) never made it
-into a non-snapshot release. My implementation is from scratch, but - of
-course - contains insights from existing open source work such as `clj-diff`
-and others.
+There is `clojure.data/diff` but it does not exactly what I had
+in mind, as the following REPL output shows:
+
+```clojure
+(clojure.data/diff [1 2 3 4 5 6 7 8] [1 3 4 5 6 9])
+;= [[nil 2 3 4 5 6 7 8] [nil 3 4 5 6 9] [1]]
+```
+
+The result must be interpreted according to its docstring as
+`[things-only-in-a things-only-in-b things-in-both]`. However,
+the sequence `[3 4 5 6]` is part of , so the result is far from
+something like a minimal edit-script.
+
+
+Next stop was [clj-diff](https://github.com/brentonashworth/clj-diff),
+but unfortunately the good work never made it into a non-snapshot
+release. My implementation is from scratch, but - of course - contains
+insights from existing open source work such as `clj-diff` and others.
 
 
 ## Usage
