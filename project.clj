@@ -12,10 +12,11 @@
   :codox {:defaults {}
           :sources ["src" "target/classes"]
           :exclude []
+          :src-uri-mapping {#"target/classes" #(str "src/" % "x")}
           :src-dir-uri "https://github.com/friemen/diffit/blob/master/"
           :src-linenum-anchor-prefix "L"}
   :scm {:name "git"
-        :url "https://github.com/friemen/examine"}
+        :url "https://github.com/friemen/diffit"}
   :repositories [["clojars" {:url "https://clojars.org/repo"
                              :creds :gpg}]]
   :hooks [cljx.hooks]
