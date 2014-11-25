@@ -1,19 +1,21 @@
 # diffit
 
 A Clojure(Script) diff and patch implementation for vectors and
-maps. It calculates the *edit-distance* and a minimal *edit-script* to
-transform the first into the second collection by applying insertions
-and deletions.
+maps.
 
 [![Build Status](https://travis-ci.org/friemen/diffit.png?branch=master)](https://travis-ci.org/friemen/diffit)
 
 [![Clojars Project](http://clojars.org/diffit/latest-version.svg)](http://clojars.org/diffit)
 
-The vector based implementation follows
-[An O(NP) Sequence Comparison Algorithm](http://www.itu.dk/stud/speciale/bepjea/xwebtex/litt/an-onp-sequence-comparison-algorithm.pdf)
-by Wu, Manber, Myers and Miller.
+Include the dependency as shown above in your project.clj
 
 [API docs](https://friemen.github.com/diffit)
+
+Diff calculates the *edit-distance* and a minimal *edit-script* to
+transform the first into the second collection via patch.
+The vector based diff implementation follows
+[An O(NP) Sequence Comparison Algorithm](http://www.itu.dk/stud/speciale/bepjea/xwebtex/litt/an-onp-sequence-comparison-algorithm.pdf)
+by Wu, Manber, Myers and Miller.
 
 
 ## Why
@@ -21,14 +23,14 @@ by Wu, Manber, Myers and Miller.
 The obvious application of the vector based implementation is diff and
 patch of text files represented by seqs of strings.
 
-Another could be this: building data transformations with side-effect
-free functions is sane, but might require synchronization of
-the final result with state wrapped by an expensive mutation-based
-API, for example a bound JavaFX ObservableList.
+Another could be the desire to synchronize the final result of a data
+transformation (composed of side-effect free functions) with state
+wrapped by an expensive mutation-based API, for example a bound JavaFX
+ObservableList. A fast diff with a configurable patch is one way to
+tackle this.
 
 A 3rd scenario could be the requirement to transmit a minimal amount
-of data changes to a remote process for further processing. A fast
-diff is one way to tackle this.
+of data changes to a remote process for further processing. 
 
 
 There is `clojure.data/diff` but it does not exactly what I had
@@ -64,7 +66,7 @@ which will be treated as vectors.
 Let `x`, `y` both be sequential or associative, respectively:
  * `(diff x y)` produces a *diff-result* which is a pair of
    `[edit-distance edit-script]`.
- * `(patch diff-result x)` applies the edit-script in diff-result to
+ * `(patch x diff-result)` applies the edit-script in diff-result to
    `x` in order to reproduce `y`.
  * It holds that `(= y (patch x (diff x y))`.
 
@@ -97,11 +99,11 @@ The edit-script in the output above can be read like this:
 Once you have the result from `diff` you can apply its edit-script with `patch`:
 
 ```clojure
-(v/patch [1 2 3 4])
+(v/patch [1 2 3 4] diff-result)
 ;= [1 2 7 8 4]
 ```
 
-The `patch` function can be used with two or three (resp.) additional
+The `patch` function can be used with two or three, respectively, additional
 arguments to hand in functions that actually do the insert, remove,
 assoc, dissoc or replace operation. This lets you adapt `patch` to an
 API based on mutation.
@@ -235,9 +237,13 @@ Found 4 outliers in 60 samples (6.6667 %)
  Variance from outliers : 1.6389 % Variance is slightly inflated by outliers
 ```
 
+## Performance for map based diff
 
-Unsurprisingly, the `diff` for maps is an order of magnitude faster due
+Unsurprisingly, the `diff` for maps is an *order of magnitude faster* due
 to the performance characteristics of the underlying datastructures.
+
+I did no comparison between different libraries (are there any?) or
+implementations.
 
 
 ## License
