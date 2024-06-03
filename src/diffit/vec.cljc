@@ -7,10 +7,10 @@
 ;; fp is a map {k -> [d edits]} from diagonal k to a pair where
 ;;   d is the furthest distance and
 ;;   edits is a vector of edit operations.
-;; 
+;;
 ;; as, bs are sequences of arbitrary items that support equals (=)
 ;; av, bv are vector versions that have better count and nth performance
-;; 
+;;
 
 
 ;; ---------------------------------------------------------------------------
@@ -32,15 +32,15 @@
   [av bv fp k]
   (let [n     (count av)
         m     (count bv)
-        #+clj ^long k+1 #+cljs k+1 (inc k)
-        #+clj ^long k-1 #+cljs k-1 (dec k)
+        #?(:clj ^long k+1 :cljs k+1) (inc k)
+        #?(:clj ^long k-1 :cljs k-1) (dec k)
         i   (inc (distance fp k-1))
-        #+clj ^long j   #+cljs j   (distance fp k+1)
-        #+clj ^long x   #+cljs x   (max i j)
-        #+clj ^long y   #+cljs y   (- x k)
+        #?(:clj ^long j   :cljs j)   (distance fp k+1)
+        #?(:clj ^long x   :cljs x)   (max i j)
+        #?(:clj ^long y   :cljs y)   (- x k)
         ;; search for the maximum x on diagonal
-        fx    (loop [#+clj ^long x #+cljs x x
-                     #+clj ^long y #+cljs y y]
+        fx    (loop [#?(:clj ^long x :cljs x) x
+                     #?(:clj ^long y :cljs y) y]
                 (if (and (< x n) (< y m) (= (nth av x) (nth bv y)) )
                   (recur (inc x) (inc y))
                   x))]
@@ -118,7 +118,7 @@
   "Returns a pair [edit-distance edit-script] as result of comparision
   of sequences as and bs.
 
-  Edit-distance is an integer. 
+  Edit-distance is an integer.
 
   The edit-script is a sequence of vectors starting with an insert or
   delete operation symbol :+ or :-.
@@ -178,5 +178,3 @@
                       :- (remove-f bs (first params) (second params))))
                   as
                   es))))
-
-

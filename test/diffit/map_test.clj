@@ -1,9 +1,7 @@
 (ns diffit.map-test
-  (:require #+clj [clojure.test :refer :all]
-            #+cljs [cemerick.cljs.test :as t]
+  (:require [clojure.test :refer :all]
             [diffit.map :refer [diff patch]])
-  #+cljs (:require-macros [cemerick.cljs.test :refer [is are deftest testing]])
-  #+clj (:import [java.util HashMap]))
+   (:import [java.util HashMap]))
 
 
 (deftest diff-tests
@@ -23,7 +21,7 @@
        {}           {:b 2}
        {:a 1 :b 2}  {:a 2 :b 3 :c 4}))
 
-#+clj
+
 (deftest patch-javamap-test
   (let [am  {:a 1 :b 2 :c 3 :d 4}
         bm  {:a 2 :c 3 :d 5 :e 6}

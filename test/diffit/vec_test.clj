@@ -1,9 +1,7 @@
 (ns diffit.vec-test
-  (:require #+clj [clojure.test :refer :all]
-            #+cljs [cemerick.cljs.test :as t]
+  (:require [clojure.test :refer :all]
             [diffit.vec :refer [diff patch]])
-  #+cljs (:require-macros [cemerick.cljs.test :refer [is are deftest testing]])
-  #+clj (:import [java.util ArrayList]))
+  (:import [java.util ArrayList]))
 
 
 
@@ -19,7 +17,7 @@
        "ABCDEF"    "ADEF"
        "ABCDEF"    "ABCdefXYZEFABCDEF"))
 
-#+clj
+
 (deftest patch-javalist-test
   (let [as [:a :b :c :d :e :a :b :d]
         bs [:a :c :d :a :b :d]
@@ -61,4 +59,3 @@
                  patched (patch as diffres)]
              (= bs patched))
        10 100 1000 2000))
-
