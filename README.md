@@ -5,16 +5,16 @@ maps.
 
 [![Build Status](https://travis-ci.org/friemen/diffit.png?branch=master)](https://travis-ci.org/friemen/diffit)
 
-[![Clojars Project](http://clojars.org/diffit/latest-version.svg)](http://clojars.org/diffit)
+[![Clojars Project](https://clojars.org/diffit/latest-version.svg)](https://clojars.org/diffit)
 
 Include the dependency as shown above in your project.clj
 
-[API docs](https://friemen.github.com/diffit)
+[API docs](https://friemen.github.io/diffit)
 
 Diff calculates the *edit-distance* and a minimal *edit-script* to
 transform the first into the second collection via patch.
 The vector based diff implementation follows
-[An O(NP) Sequence Comparison Algorithm](http://www.itu.dk/stud/speciale/bepjea/xwebtex/litt/an-onp-sequence-comparison-algorithm.pdf)
+[An O(NP) Sequence Comparison Algorithm](https://publications.mpi-cbg.de/Wu_1990_6334.pdf)
 by Wu, Manber, Myers and Miller.
 
 
@@ -30,7 +30,7 @@ ObservableList. A fast diff with a configurable patch is one way to
 tackle this.
 
 A 3rd scenario could be the requirement to transmit a minimal amount
-of data changes to a remote process for further processing. 
+of data changes to a remote process for further processing.
 
 
 There is `clojure.data/diff` but it does not exactly what I had
@@ -81,7 +81,7 @@ In the REPL:
 ```
 
 The diff-result is a pair: the first part is the
-[edit-distance](http://en.wikipedia.org/wiki/Edit_distance), the
+[edit-distance](https://en.wikipedia.org/wiki/Edit_distance), the
 second part is a sequence of edits (called an *edit-script*) that is
 needed to produce the second input collection from the first.
 
@@ -248,6 +248,6 @@ implementations.
 
 ## License
 
-Copyright © 2014 F.Riemenschneider
+Copyright © 2014-2025 F.Riemenschneider
 
 Distributed under the Eclipse Public License version 1.0.

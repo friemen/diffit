@@ -10,19 +10,18 @@
    :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies
-  [[org.clojure/clojure "1.10.3"]]
+  [[org.clojure/clojure "1.12.1"]]
 
   :plugins
   [[lein-codox "0.10.8"]]
 
   :codox
-  {:defaults {}
-   :sources ["src"]
-   :exclude []
-   :src-dir-uri "https://github.com/friemen/diffit/blob/master/"
-   :src-linenum-anchor-prefix "L"}
-  :scm
+  {:language     :clojure
+   :source-paths ["src"]
+   :namespaces   [#"^diffit"]
+   :source-uri   "https://github.com/friemen/diffit/blob/master/{filepath}#L{line}"}
 
+  :scm
   {:name "git"
    :url "https://github.com/friemen/diffit"}
 
